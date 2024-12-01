@@ -1,0 +1,44 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String           @id @default(uuid())
+  name           String
+  email          String           @unique
+  password       String
+  secretSantaFor SecretSanta[]    @relation("Giver")
+  secretSantaBy  SecretSanta[]    @relation("Receiver")
+  mealItems      MealPlanningItem[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model SecretSanta {
+  id         String   @id @default(uuid())
+  giver      User     @relation("Giver", fields: [giverId], references: [id])
+  giverId    String
+  receiver   User     @relation("Receiver", fields: [receiverId], references: [id])
+  receiverId String
+  year       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([giverId, year])
+  @@unique([receiverId, year])
+}
+
+model MealPlanningItem {
+  id        String   @id @default(uuid())
+  name      String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
